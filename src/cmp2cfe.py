@@ -191,6 +191,68 @@ def get_bsl_blocks(lines):
 
     return rez
 
+def code_equal(list1, list2):
+    if len(list1) != len(list2):
+        return False
+
+    indx = 0
+    for str1 in list1:
+        if str1 != list2[indx]:
+            return False
+        indx += 1
+
+    return True
+
+def bsl_blocks_match(bbl1, bbl2):
+    
+    # Словарь для поиска по наименованию
+    fnames2 = {}
+    indx = 0
+    for block1 in bbl2:
+        if block1['type'] == 'f' and block1['desc']['fname'] != '':
+            fnames2[block1['desc']['fname']] = indx
+        indx += 1
+
+    cmps = []
+    founded = []
+    # Первый проход. Точное совпадение
+    indx = 0
+    for block1 in bbl1:
+        indx2 = -1
+        if block1['type'] == 'f' and block1['desc']['fname'] != '':
+            indx2 = fnames2.get(block1['desc']['fname'], -1)
+        
+        if indx2 >= 0  and indx2 in founded:
+            indx2 = -1
+        
+        if indx2 >= 0:
+            founded.append(indx2)
+
+        cmps.append({"i1": indx, "i2": indx2})
+        indx += 1
+    
+    for cmp in cmps:
+        if cmp['i2'] == -1:
+            indx2 = 0
+            block1 = bbl1[cmp['i1']]
+            for block2 in bbl2:
+                if not(indx2 in founded):
+                    if code_equal(block1['block'], block2['block']):
+                        cmp['i2'] = indx2
+                        founded.append(indx2)
+                        break
+                
+                indx2 += 1
+
+    indx2 = 0
+    for block2 in bbl2:
+        if not(indx2 in founded):
+            cmps.append({"i1": -1, "i2": indx2})
+        indx2 += 1
+
+    return cmps
+
+
 
 
 def compare_directories(dir1, dir2, output_dir):
@@ -218,6 +280,46 @@ def compare_directories(dir1, dir2, output_dir):
 
         compare_files(file1, file2, output_file)
 
+def diff_add_end_section(diff_text, tp, last_tp):
+    if tp != last_tp:
+        if last_tp == '- ':
+            diff_text.append("#КонецУдаления")
+        elif last_tp == '+ ':
+            diff_text.append("#КонецВставки")
+        elif last_tp == '? ':
+            diff_text.append("#КонецВставки")
+
+def new_diff_text(block1, block2, differ):
+    diff_text = []
+    last_tp = ''
+    diff_blocks = []
+    cur_bl = []
+    for diff_line in differ.compare(block1, block2):
+        tp = diff_line[0:2]
+        if last_tp != tp:
+            last_tp = tp
+            diff_blk = {'tp':tp, 'block': []}
+            diff_blocks.append(diff_blk)
+            cur_bl = diff_blk['block']
+            
+        cur_bl.append(diff_line[2:])
+    
+    for blck in diff_blocks:
+        if blck['tp'] == '  ':
+            diff_text.extend(blck['block'])
+        elif blck['tp'] == '- ':
+            diff_text.append('#НачалоУдаления')
+            diff_text.extend(blck['block'])
+            diff_text.append('#КонецУдаления')
+        elif blck['tp'] == '+ ':
+            diff_text.append('#НачалоВставки')
+            diff_text.extend(blck['block'])
+            diff_text.append('#КонецВставки')
+        elif blck['tp'] == '? ':
+            diff_text.extend(blck['block'])
+    
+    return diff_text
+
 def compare_files(file1, file2, output_file):
     #try:
         # Проверяем существование файлов
@@ -234,13 +336,27 @@ def compare_files(file1, file2, output_file):
         if lines1 == lines2:
             return;
 
-        #bbl2 = get_bsl_blocks(lines2)
+        bbl1 = get_bsl_blocks(lines1)
+        bbl2 = get_bsl_blocks(lines2)
 
-        for block1 in get_bsl_blocks(lines1):
-            if block1['type'] not in ['c', 'r', 're']:
-                print(f"type: {block1['type']} desc: {block1['desc']['fname']} code: {block1['block'][0:3]}")
-            else:
-                print(f"type: {block1['type']} code: {block1['block'][0:3]}")
+        cmprs = bsl_blocks_match(bbl1, bbl2)
+        differ = difflib.Differ()
+        for cmpr in cmprs:
+            if cmpr['i1'] != -1 and  cmpr['i2'] != -1:
+                block1 = bbl1[cmpr['i1']]['block']
+                block2 = bbl2[cmpr['i2']]['block']
+                if not code_equal(block1, block2):
+                    diff_text = new_diff_text(block1, block2, differ)
+                    print('\r\n'.join(diff_text))
+                
+                
+        
+
+        #for block1 in get_bsl_blocks(lines1):
+        #    if block1['type'] not in ['c', 'r', 're']:
+        #        print(f"type: {block1['type']} desc: {block1['desc']['fname']} code: {block1['block'][0:3]}")
+        #    else:
+        #        print(f"type: {block1['type']} code: {block1['block'][0:3]}")
         #for block2 in bbl2:
         #    print(block2['type'])
         
