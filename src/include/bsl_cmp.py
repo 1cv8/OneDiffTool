@@ -61,18 +61,40 @@ def code_equal(list1, list2):
 
     return True
 
+def block_wo_comments(block):
+    if block['type'] == 'f':
+        if block['csize'] > 0:
+            return block['block'][block['csize']:]
+        else:
+            return block['block']
+    return block['block']
 
-def bsl_match(lines1, lines2):
+
+def bsl_match(lines1, lines2, wo_comments = False):
     bbl1 = get_bsl_blocks(lines1)
     bbl2 = get_bsl_blocks(lines2)
     cmprs = bsl_blocks_match(bbl1, bbl2)
     diff_blks = []
     for cmpr in cmprs:
          if cmpr['i1'] != -1 and  cmpr['i2'] != -1:
-            block1 = bbl1[cmpr['i1']]['block']
-            block2 = bbl2[cmpr['i2']]['block']
+            blok_desc1 = bbl1[cmpr['i1']]
+            blok_desc2 = bbl2[cmpr['i2']]
+            
+            block1 = None
+            block2 = None
+            if wo_comments:
+                block1 = block_wo_comments(blok_desc1)
+                block2 = block_wo_comments(blok_desc2)
+            else:
+                block1 = blok_desc1['block']
+                block2 = blok_desc2['block']
+            
+            fname = ''
+            if blok_desc1['type'] == 'f':
+                fname = blok_desc1['desc']['fname']
+
             if not code_equal(block1, block2):
-                 diff_blks.append({'b1': block1, 'b2': block2})
+                 diff_blks.append({'b1': block1, 'b2': block2, 'type': blok_desc1['type'], 'fname': fname})
     return diff_blks
 
 
@@ -93,6 +115,7 @@ def get_bsl_blocks(lines):
     cur_fname = ''
     start_code = 0
     in_func = False
+    comments_size = 0
     
     while i < len(lines):
         line = lines[i]
@@ -118,6 +141,7 @@ def get_bsl_blocks(lines):
             start_i = i
             cur_block = []
             start_code = 0
+            comments_size = len(comments)
             if len(comments) > 0:
                 cur_block = comments
                 start_code = len(comments) 
@@ -132,7 +156,7 @@ def get_bsl_blocks(lines):
                 btype = "c"
             #yield {"block": cur_block, "type": btype, "desc": func_description(cur_block)}
             #rez.append({"block": cur_block, "type": btype, "desc": func_description(cur_block)})
-            rez.append({"block": cur_block, "type": btype, "desc": cur_fname, "start_pos": start_code})
+            rez.append({"block": cur_block, "type": btype, "desc": cur_fname, "start_pos": start_code, 'csize': comments_size})
     
             # init block
             in_func = False
