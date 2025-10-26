@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from lib.bsl_cmp import bsl_match
+from include.bsl_cmp import bsl_match
 
 import difflib
 #import filecmp
