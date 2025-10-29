@@ -1,11 +1,12 @@
 
 import os
+import argparse
+
 from pathlib import Path
 
 from include.bsl_cmp import bsl_match
 
 import difflib
-#import filecmp
 
 import hashlib
 
@@ -175,14 +176,26 @@ def compare_code_blocks(file1, file2, output_file):
     return
 
 def main():
-    r_prefix = 'NW'
+
+    #parser = argparse.ArgumentParser(description='Обработка по сравнению конфигураций 1С и сохранению изменений в расширение')
+    
+    #parser.add_argument('-d1', '--dir1', required=True, help='Каталог с исходной конфигурацией')
+    #parser.add_argument('-d2', '--dir2', required=True, help='Каталог с целевой конфигурацией')
+    #parser.add_argument('-o', '--dir_out', required=True, help='Каталог для формирования расширения')
+    #parser.add_argument('-p', '--prefix', required=True, help='Префикс расширения')
+
+    #args = parser.parse_args()
+
+    prefix = 'NEW'
 
     dir1 = "D:\\Progr\\test\\cmp\\base"
-    dir2 = "D:\\Progr\\test\\cmp\\2nd" 
-    output_dir = "D:\\Progr\\test\\cmp\\rez\\" + r_prefix
+    dir2 = "D:\\Progr\\test\\cmp\\2nd"
+    dir_out = "D:\\Progr\\test\\cmp\\rez"
+
+    output_dir = dir_out + "\\" + args.prefix
     
-    compare_directories(dir1, dir2, output_dir, r_prefix)
-    print(f"Сравнение завершено. Результаты в {output_dir}")
+    compare_directories(dir1, dir2, output_dir, prefix)
+    print(f"Сравнение завершено. Результаты в {args.dir_out}")
 
 if __name__ == "__main__":
     main()
