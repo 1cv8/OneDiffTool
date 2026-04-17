@@ -54,7 +54,7 @@ def compare_directories(dir1, dir2, output_dir, r_prefix):
     output_dir = Path(output_dir)
     
     # Создаем выходной каталог
-    output_dir.mkdir(exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     # Получаем список всех файлов
     files1 = {f.relative_to(dir1) for f in dir1.rglob('*.bsl') if f.is_file()}
@@ -127,11 +127,11 @@ def new_diff_text(diff_blk, differ, prefix):
         if blck['tp'] == '  ':
             diff_text.extend(blck['block'])
         elif blck['tp'] == '- ':
-            diff_text.append('#НачалоУдаления\n')
+            diff_text.append('#Удаление\n')
             diff_text.extend(blck['block'])
             diff_text.append('#КонецУдаления\n')
         elif blck['tp'] == '+ ':
-            diff_text.append('#НачалоВставки\n')
+            diff_text.append('#Вставка\n')
             diff_text.extend(blck['block'])
             diff_text.append('#КонецВставки\n')
         elif blck['tp'] == '? ':
@@ -177,24 +177,18 @@ def compare_code_blocks(file1, file2, output_file):
 
 def main():
 
-    #parser = argparse.ArgumentParser(description='Обработка по сравнению конфигураций 1С и сохранению изменений в расширение')
+    parser = argparse.ArgumentParser(description='Обработка по сравнению конфигураций 1С и сохранению изменений в расширение')
     
-    #parser.add_argument('-d1', '--dir1', required=True, help='Каталог с исходной конфигурацией')
-    #parser.add_argument('-d2', '--dir2', required=True, help='Каталог с целевой конфигурацией')
-    #parser.add_argument('-o', '--dir_out', required=True, help='Каталог для формирования расширения')
-    #parser.add_argument('-p', '--prefix', required=True, help='Префикс расширения')
+    parser.add_argument('-d1', '--dir1', required=True, help='Каталог с исходной конфигурацией')
+    parser.add_argument('-d2', '--dir2', required=True, help='Каталог с целевой конфигурацией')
+    parser.add_argument('-o', '--dir_out', required=True, help='Каталог для формирования расширения')
+    parser.add_argument('-p', '--prefix', required=True, help='Префикс расширения')
 
-    #args = parser.parse_args()
+    args = parser.parse_args()
 
-    prefix = 'NEW'
-
-    dir1 = "D:\\Progr\\test\\cmp\\base"
-    dir2 = "D:\\Progr\\test\\cmp\\2nd"
-    dir_out = "D:\\Progr\\test\\cmp\\rez"
-
-    output_dir = dir_out + "\\" + args.prefix
+    output_dir = args.dir_out + "\\" + args.prefix
     
-    compare_directories(dir1, dir2, output_dir, prefix)
+    compare_directories(args.dir1, args.dir2, output_dir, args.prefix)
     print(f"Сравнение завершено. Результаты в {args.dir_out}")
 
 if __name__ == "__main__":
