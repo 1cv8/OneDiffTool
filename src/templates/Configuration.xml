@@ -44,8 +44,8 @@
 			<ConfigurationExtensionPurpose>Customization</ConfigurationExtensionPurpose>
 			<KeepMappingToExtendedConfigurationObjectsByIDs>true</KeepMappingToExtendedConfigurationObjectsByIDs>
 			<NamePrefix>{Prefix}_</NamePrefix>
-			<ConfigurationExtensionCompatibilityMode>Version8_3_24</ConfigurationExtensionCompatibilityMode>
-			<ScriptVariant>Russian</ScriptVariant>
+			<ConfigurationExtensionCompatibilityMode>{CompatibilityMode}</ConfigurationExtensionCompatibilityMode>
+			<ScriptVariant>{ScriptVariant}</ScriptVariant>
 			<Vendor/>
 			<Version/>
 			<BriefInformation/>
@@ -55,8 +55,6 @@
 			<ConfigurationInformationAddress/>
 		</Properties>
 		<ChildObjects>
-			<Language>Русский</Language>
-			<CommonModule>АвтономнаяРабота</CommonModule>
-		</ChildObjects>
+{ChildObjects}		</ChildObjects>
 	</Configuration>
 </MetaDataObject>

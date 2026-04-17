@@ -7,7 +7,7 @@
 			<Name>{base_Name}</Name>
 			<Comment/>
 			<ExtendedConfigurationObject>{base_uuid}</ExtendedConfigurationObject>
-			<LanguageCode>ru</LanguageCode>
+			<LanguageCode>{language_code}</LanguageCode>
 		</Properties>
 	</Language>
 </MetaDataObject>
